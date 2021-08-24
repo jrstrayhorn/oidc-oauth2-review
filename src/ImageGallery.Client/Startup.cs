@@ -72,6 +72,7 @@ namespace ImageGallery.Client
                 //options.Scope.Add("openid");
                 //options.Scope.Add("profile");
                 options.Scope.Add("address");
+                options.Scope.Add("roles");
 
                 //options.ClaimActions.Remove("nbf"); // ensure that will be in claims
                 // these options will remove from claims - we will get address from userInfo endpoint
@@ -85,6 +86,11 @@ namespace ImageGallery.Client
                 options.ClaimActions.DeleteClaim("idp");
                 options.ClaimActions.DeleteClaim("s_hash");
                 options.ClaimActions.DeleteClaim("auth_time");
+
+                // roles isn't mapped by default, we need to add them ourselves
+                // 1st parameter is claim type, 2nd parameter is what name should be in json
+                options.ClaimActions.MapUniqueJsonKey("role", "role");
+
                 options.SaveTokens = true;
                 options.ClientSecret = "secret";
                 options.GetClaimsFromUserInfoEndpoint = true;
