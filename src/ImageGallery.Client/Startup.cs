@@ -36,6 +36,14 @@ namespace ImageGallery.Client
                 client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
             });
 
+            // create an HttpClient used for accessing the API
+            services.AddHttpClient("IDPClient", client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:44318/");
+                client.DefaultRequestHeaders.Clear();
+                client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
+            });
+
             services.AddAuthentication(options => {
                 // if you have multiple apps on the same domain, you'll want to make sure
                 // the cookie names are different so they don't interfere with each other
