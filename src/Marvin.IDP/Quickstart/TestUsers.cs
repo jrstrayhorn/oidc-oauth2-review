@@ -71,7 +71,8 @@ namespace IdentityServerHost.Quickstart.UI
                         Claims = new List<Claim> // info about the user
                         {
                             new Claim("given_name", "Frank"),
-                            new Claim("family_name", "Underwood")
+                            new Claim("family_name", "Underwood"),
+                            new Claim("address", "Main Road 1")
                         }
                     },
                     new TestUser
@@ -83,7 +84,8 @@ namespace IdentityServerHost.Quickstart.UI
                         Claims = new List<Claim>
                         {
                             new Claim("given_name", "Claire"),
-                            new Claim("family_name", "Underwood")
+                            new Claim("family_name", "Underwood"),
+                            new Claim("address", "Big Street 2")
                         }
                     }
                 };

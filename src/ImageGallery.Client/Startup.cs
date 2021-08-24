@@ -61,9 +61,18 @@ namespace ImageGallery.Client
                 // default for signout is signout-callback-oidc
 
                 // open id and profile is added by default so don't need this...
-                options.Scope.Add("openid");
-                options.Scope.Add("profile");
+                //options.Scope.Add("openid");
+                //options.Scope.Add("profile");
+                options.Scope.Add("address");
+
                 //options.ClaimActions.Remove("nbf"); // ensure that will be in claims
+                // these options will remove from claims - we will get address from userInfo endpoint
+                // removing these claims to keep token returned on front channnel small
+                // the constructor for OpenIdConnectOptions middleware.. deletes a bunch of claims by default
+                // it also maps some standard claims by default
+                // sub, name, given_name, family_name, profile, email
+                // there is no standard mapping for address so it won't show up in claims
+                // options.ClaimActions.DeleteClaim("address");
                 options.ClaimActions.DeleteClaim("sid");
                 options.ClaimActions.DeleteClaim("idp");
                 options.ClaimActions.DeleteClaim("s_hash");

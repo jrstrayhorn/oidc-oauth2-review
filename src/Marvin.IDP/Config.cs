@@ -15,7 +15,8 @@ namespace Marvin.IDP
             new IdentityResource[]
             { 
                 new IdentityResources.OpenId(), // must have this for oidc, gives subject id
-                new IdentityResources.Profile() // returns given_name, family_name anyother profile info
+                new IdentityResources.Profile(), // returns given_name, family_name anyother profile info
+                new IdentityResources.Address()
             };
 
         // what apis a client can access, map to scope that give access to apis
@@ -44,7 +45,8 @@ namespace Marvin.IDP
                     AllowedScopes = // what scopes the client can access
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Profile
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Address
                     },
                     ClientSecrets = // used for client authentication to allow client to call the token endpoint
                     {
