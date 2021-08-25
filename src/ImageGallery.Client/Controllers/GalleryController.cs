@@ -205,7 +205,11 @@ namespace ImageGallery.Client.Controllers
         // can do multiple roles by separating string with comma
         // like Roles = "PayingUser, Admin, abc, whatever"
         // the claims at this level - client comes from ID Token
-        [Authorize(Roles = "PayingUser")]
+        //[Authorize(Roles = "PayingUser")]
+        // better to use policy for authorization instead of custom
+        // code so that if it needs to change it can be done in one place
+        // where we defined the policy
+        [Authorize(Policy = "CanOrderFrame")]
         public async Task<IActionResult> OrderFrame()
         {
             var idpClient = _httpClientFactory.CreateClient("IDPClient");
