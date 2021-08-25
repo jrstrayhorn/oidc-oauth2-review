@@ -56,7 +56,9 @@ namespace ImageGallery.Client
                 options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
             })
             // enables cookie based authentication
-            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options => {
+                options.AccessDeniedPath = "/Authorization/AccessDenied";
+            })
             .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
             {
                 options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -78,7 +80,7 @@ namespace ImageGallery.Client
 
                 //options.ClaimActions.Remove("nbf"); // ensure that will be in claims
                 // these options will remove from claims - we will get address from userInfo endpoint
-                // removing these claims to keep token returned on front channnel small
+                // removing these claims to keep cookie small
                 // the constructor for OpenIdConnectOptions middleware.. deletes a bunch of claims by default
                 // it also maps some standard claims by default
                 // sub, name, given_name, family_name, profile, email
