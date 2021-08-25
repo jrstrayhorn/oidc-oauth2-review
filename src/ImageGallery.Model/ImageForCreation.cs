@@ -2,6 +2,8 @@
 
 namespace ImageGallery.Model
 {
+    // using a separate DTO for various actions
+    // that are different from database entity!!
     public class ImageForCreation
     {
         [Required]

@@ -3,6 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ImageGallery.API.Entities
 {
+    // don't use entities directly for serialize - use a DTO
+    // and don't reuse DTO across actions!!
     public class Image
     {
         [Key]
