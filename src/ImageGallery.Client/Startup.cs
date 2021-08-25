@@ -103,6 +103,7 @@ namespace ImageGallery.Client
                 options.Scope.Add("imagegalleryapi");
                 options.Scope.Add("subscriptionlevel");
                 options.Scope.Add("country");
+                options.Scope.Add("offline_access");
 
                 //options.ClaimActions.Remove("nbf"); // ensure that will be in claims
                 // these options will remove from claims - we will get address from userInfo endpoint
