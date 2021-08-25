@@ -37,6 +37,9 @@ namespace Marvin.IDP
             new ApiResource[]
             {
                 new ApiResource("imagegalleryapi", "Image Gallery API")
+                {
+                    Scopes = {"imagegalleryapi"}
+                }
             };
 
         // what clients this IDP is for

@@ -34,6 +34,7 @@ namespace ImageGallery.API
                 {
                     options.Authority = "https://localhost:44318";
                     options.ApiName = "imagegalleryapi";
+                    
                 });
 
             // register the DbContext on the container, getting the connection string from
