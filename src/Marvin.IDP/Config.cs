@@ -28,7 +28,16 @@ namespace Marvin.IDP
         // what apis a client can access, map to scope that give access to apis
         public static IEnumerable<ApiScope> ApiScopes =>
             new ApiScope[]
-            { };
+            { 
+                new ApiScope("imagegalleryapi", "Image Gallery API")
+            };
+
+        // logically grouping of Api Scopes, used to define an entire api
+        public static IEnumerable<ApiResource> ApiResources =>
+            new ApiResource[]
+            {
+                new ApiResource("imagegalleryapi", "Image Gallery API")
+            };
 
         // what clients this IDP is for
         // need at least one client per app
@@ -53,7 +62,8 @@ namespace Marvin.IDP
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
                         IdentityServerConstants.StandardScopes.Address,
-                        "roles"
+                        "roles",
+                        "imagegalleryapi"
                     },
                     ClientSecrets = // used for client authentication to allow client to call the token endpoint
                     {
