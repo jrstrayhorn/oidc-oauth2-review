@@ -31,6 +31,23 @@ namespace ImageGallery.Client
             services.AddControllersWithViews()
                  .AddJsonOptions(opts => opts.JsonSerializerOptions.PropertyNamingPolicy = null);
 
+            services.AddAuthorization(authorizationOptions =>
+            {
+                authorizationOptions.AddPolicy(
+                    "CanOrderFrame",
+                    policyBuilder =>
+                    {
+                        policyBuilder.RequireAuthenticatedUser();
+                        // if you want to match multiple claims, just add as additional parameters
+                        // like RequireClaim("country", "be", "us")
+                        policyBuilder.RequireClaim("country", "be");
+                        policyBuilder.RequireClaim("subscriptionlevel", "PayingUser");
+                        // if you also wat to require a role do this
+                        // policyBuilder.RequireRole("admin")
+                    }
+                );
+            });
+
             services.AddHttpContextAccessor();
 
             // since it's short lived service, use Transient
@@ -84,6 +101,8 @@ namespace ImageGallery.Client
                 options.Scope.Add("address");
                 options.Scope.Add("roles");
                 options.Scope.Add("imagegalleryapi");
+                options.Scope.Add("subscriptionlevel");
+                options.Scope.Add("country");
 
                 //options.ClaimActions.Remove("nbf"); // ensure that will be in claims
                 // these options will remove from claims - we will get address from userInfo endpoint
@@ -101,6 +120,8 @@ namespace ImageGallery.Client
                 // roles isn't mapped by default, we need to add them ourselves
                 // 1st parameter is claim type, 2nd parameter is what name should be in json
                 options.ClaimActions.MapUniqueJsonKey("role", "role");
+                options.ClaimActions.MapUniqueJsonKey("subscriptionlevel", "subscriptionlevel");
+                options.ClaimActions.MapUniqueJsonKey("country", "country");
 
                 options.SaveTokens = true;
                 options.ClientSecret = "secret";

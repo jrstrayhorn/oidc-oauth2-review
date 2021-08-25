@@ -11,6 +11,7 @@ namespace Marvin.IDP
     public static class Config
     {
         // user claims - map to scope that give access to identity info
+        // policies for attribute based access would be setup here as well
         public static IEnumerable<IdentityResource> IdentityResources =>
             new IdentityResource[]
             { 
@@ -22,6 +23,16 @@ namespace Marvin.IDP
                     "roles", // name of scope
                     "Your role(s)",
                     new List<string>() { "role" } // when you ask for this scope, what is returned
+                ),
+                new IdentityResource(
+                    "country",
+                    "The country you're living in",
+                    new List<string>() { "country" }
+                ),
+                new IdentityResource(
+                    "subscriptionlevel",
+                    "Your subscription level",
+                    new List<string>() { "subscriptionlevel" }
                 )
             };
 
@@ -68,7 +79,9 @@ namespace Marvin.IDP
                         IdentityServerConstants.StandardScopes.Profile,
                         IdentityServerConstants.StandardScopes.Address,
                         "roles",
-                        "imagegalleryapi"
+                        "imagegalleryapi",
+                        "country",
+                        "subscriptionlevel"
                     },
                     ClientSecrets = // used for client authentication to allow client to call the token endpoint
                     {
