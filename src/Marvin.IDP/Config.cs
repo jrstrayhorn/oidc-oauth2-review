@@ -51,7 +51,9 @@ namespace Marvin.IDP
                 // if you need to add identity related scopes to access token
                 new ApiResource("imagegalleryapi", "Image Gallery API", new List<string>() { "role" })
                 {
-                    Scopes = {"imagegalleryapi"}
+                    Scopes = {"imagegalleryapi"},
+                    ApiSecrets = { new Secret("apisecret".Sha256()) } // need secret to hit token introspective endpoint to get
+                                                                        // access token from reference token
                 }
             };
 
@@ -62,6 +64,10 @@ namespace Marvin.IDP
             { 
                 new Client
                 {
+                    // using a reference token means having to hit IDP
+                    // on API call to get the rest of the access token
+                    // instead of jwt
+                    AccessTokenType = AccessTokenType.Reference,
                     AccessTokenLifetime = 120,
                     // allows client to request access token
                     AllowOfflineAccess = true,
