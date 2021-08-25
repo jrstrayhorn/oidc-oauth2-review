@@ -50,6 +50,8 @@ namespace ImageGallery.API.Controllers
         }
 
         [HttpGet("{id}", Name = "GetImage")]
+        // shortcut for Authorize(Policy = "MustOwnImage")
+        [Authorize("MustOwnImage")]
         public IActionResult GetImage(Guid id)
         {          
             var imageFromRepo = _galleryRepository.GetImage(id);
@@ -109,6 +111,11 @@ namespace ImageGallery.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        // policy is an authorization layer over our api
+        // now don't have to worry about checks littered throughout the code
+        // those checks are in one central place and can be change there as needed
+        // and will affect everywhere
+        [Authorize("MustOwnImage")]
         public IActionResult DeleteImage(Guid id)
         {            
             var imageFromRepo = _galleryRepository.GetImage(id);
@@ -126,6 +133,7 @@ namespace ImageGallery.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize("MustOwnImage")]
         public IActionResult UpdateImage(Guid id, 
             [FromBody] ImageForUpdate imageForUpdate)
         {
