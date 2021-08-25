@@ -64,7 +64,7 @@ namespace IdentityServerHost.Quickstart.UI
                 {
                     new TestUser
                     {
-                        SubjectId = "10E959E6-4597-4D1F-A27A-0582EA421AC2", // this must be unique
+                        SubjectId = "d860efca-22d9-47fd-8249-791ba61b07c7", // this must be unique
                         Username = "Frank",
                         Password = "password",
 
@@ -78,7 +78,7 @@ namespace IdentityServerHost.Quickstart.UI
                     },
                     new TestUser
                     {
-                        SubjectId = "90E76206-C033-44C4-9CCA-4FB864A2B140",
+                        SubjectId = "b7539694-97e7-4dfe-84da-b4256e1ff5c7",
                         Username = "Claire",
                         Password = "password",
 

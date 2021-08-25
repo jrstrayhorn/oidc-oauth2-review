@@ -202,6 +202,7 @@ namespace ImageGallery.Client.Controllers
 
         // can do multiple roles by separating string with comma
         // like Roles = "PayingUser, Admin, abc, whatever"
+        // the claims at this level - client comes from ID Token
         [Authorize(Roles = "PayingUser")]
         public async Task<IActionResult> OrderFrame()
         {
@@ -251,7 +252,7 @@ namespace ImageGallery.Client.Controllers
             //Debug.WriteLine($"Identity Token: {identityToken}");
             _logger.LogInformation($"Identity Token: {identityToken}");
 
-            // write out the user claims
+            // write out the user claims this is from the ID Token
             foreach (var claim in User.Claims)
             {
                 // Debug.WriteLine($"Claim type: {claim.Type} - Claim value: {claim.Value}");
