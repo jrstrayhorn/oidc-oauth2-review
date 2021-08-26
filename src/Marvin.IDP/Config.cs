@@ -29,11 +29,12 @@ namespace Marvin.IDP
                     "The country you're living in",
                     new List<string>() { "country" }
                 ),
-                new IdentityResource(
-                    "subscriptionlevel",
-                    "Your subscription level",
-                    new List<string>() { "subscriptionlevel" }
-                )
+                // subscriptionlevel is now part of application user profile
+                // new IdentityResource(
+                //     "subscriptionlevel",
+                //     "Your subscription level",
+                //     new List<string>() { "subscriptionlevel" }
+                // )
             };
 
         // what apis a client can access, map to scope that give access to apis
@@ -49,7 +50,9 @@ namespace Marvin.IDP
             {
                 // you can include identity related scopes with api resources when defining
                 // if you need to add identity related scopes to access token
-                new ApiResource("imagegalleryapi", "Image Gallery API", new List<string>() { "role", "subscriptionlevel" })
+                new ApiResource("imagegalleryapi", "Image Gallery API" 
+                    /*part of application user profile nownew List<string>() { "role", "subscriptionlevel" }*/
+                    )
                 {
                     Scopes = {"imagegalleryapi"},
                     ApiSecrets = { new Secret("apisecret".Sha256()) } // need secret to hit token introspective endpoint to get
@@ -92,7 +95,7 @@ namespace Marvin.IDP
                         "roles",
                         "imagegalleryapi",
                         "country",
-                        "subscriptionlevel"
+                        // "subscriptionlevel"
                     },
                     ClientSecrets = // used for client authentication to allow client to call the token endpoint
                     {
