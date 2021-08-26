@@ -49,7 +49,7 @@ namespace Marvin.IDP
             {
                 // you can include identity related scopes with api resources when defining
                 // if you need to add identity related scopes to access token
-                new ApiResource("imagegalleryapi", "Image Gallery API", new List<string>() { "role" })
+                new ApiResource("imagegalleryapi", "Image Gallery API", new List<string>() { "role", "subscriptionlevel" })
                 {
                     Scopes = {"imagegalleryapi"},
                     ApiSecrets = { new Secret("apisecret".Sha256()) } // need secret to hit token introspective endpoint to get

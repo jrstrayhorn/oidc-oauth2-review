@@ -47,6 +47,15 @@ namespace ImageGallery.API
                         );
                     }
                 );
+
+                authorizationOptions.AddPolicy(
+                    "MustBePayingUser",
+                    policyBuilder =>
+                    {
+                        policyBuilder.RequireAuthenticatedUser();
+                        policyBuilder.RequireClaim("subscriptionlevel", "PayingUser");
+                    }
+                );
             });
 
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)

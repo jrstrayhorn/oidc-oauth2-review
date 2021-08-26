@@ -46,6 +46,15 @@ namespace ImageGallery.Client
                         // policyBuilder.RequireRole("admin")
                     }
                 );
+
+                authorizationOptions.AddPolicy(
+                    "MustBePayingUser",
+                    policyBuilder =>
+                    {
+                        policyBuilder.RequireAuthenticatedUser();
+                        policyBuilder.RequireClaim("subscriptionlevel", "PayingUser");
+                    }
+                );
             });
 
             services.AddHttpContextAccessor();
