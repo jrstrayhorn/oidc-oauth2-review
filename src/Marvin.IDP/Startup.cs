@@ -45,6 +45,8 @@ namespace Marvin.IDP
                 .AddInMemoryClients(Config.Clients);
                 //.AddTestUsers(TestUsers.Users);
 
+            builder.AddProfileService<LocalUserProfileService>();
+            
             // not recommended for production - you need to store your key material somewhere secure
             builder.AddDeveloperSigningCredential();
         }
