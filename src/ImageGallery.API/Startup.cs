@@ -34,6 +34,7 @@ namespace ImageGallery.API
             services.AddHttpContextAccessor();
             // using scoped here because it consumes repository that is scoped itself
             services.AddScoped<IAuthorizationHandler, MustOwnImageHandler>();
+            services.AddScoped<IAuthorizationHandler, SubjectMustMatchUserHandler>();
 
             services.AddAuthorization(authorizationOptions =>
             {
@@ -47,6 +48,15 @@ namespace ImageGallery.API
                         );
                     }
                 );
+
+                authorizationOptions.AddPolicy(
+                   "SubjectMustMatchUser",
+                   policyBuilder =>
+                   {
+                       policyBuilder.RequireAuthenticatedUser();
+                       policyBuilder.AddRequirements(
+                             new SubjectMustMatchUserRequirement());
+                   });
 
                 authorizationOptions.AddPolicy(
                     "MustBePayingUser",
