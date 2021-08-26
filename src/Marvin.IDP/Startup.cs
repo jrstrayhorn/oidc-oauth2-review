@@ -3,8 +3,10 @@
 
 
 using IdentityServerHost.Quickstart.UI;
+using Marvin.IDP.DbContexts;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -23,6 +25,11 @@ namespace Marvin.IDP
         {
             // uncomment, if you want to add an MVC-based UI
             services.AddControllersWithViews();
+
+            services.AddDbContext<IdentityDbContext>(options => 
+            {
+                options.UseSqlite("DataSource=identityUsers.db");
+            });
 
             var builder = services.AddIdentityServer(options =>
             {
