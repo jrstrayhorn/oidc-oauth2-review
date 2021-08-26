@@ -59,6 +59,8 @@ namespace IdentityServerHost.Quickstart.UI
         public async Task<IActionResult> Login(string returnUrl)
         {
             // build a model so we know what to show on the login page
+            // returnUrl is used to allow flow from one view to the next
+            // returnUrl is url to authorization endpoint NOT the redirection URL at level of client app
             var vm = await BuildLoginViewModelAsync(returnUrl);
 
             if (vm.IsExternalLoginOnly)
@@ -77,6 +79,8 @@ namespace IdentityServerHost.Quickstart.UI
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginInputModel model, string button)
         {
+            // checking the user's username and password here!!!
+
             // check if we are in the context of an authorization request
             var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
 
@@ -133,6 +137,8 @@ namespace IdentityServerHost.Quickstart.UI
                         DisplayName = user.Username
                     };
 
+                    // creates session for user with cookie
+                    // signing in to Identity Server
                     await HttpContext.SignInAsync(isuser, props);
 
                     if (context != null)
@@ -145,6 +151,7 @@ namespace IdentityServerHost.Quickstart.UI
                         }
 
                         // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
+                        // redirecting to continue the flow
                         return Redirect(model.ReturnUrl);
                     }
 
@@ -206,6 +213,7 @@ namespace IdentityServerHost.Quickstart.UI
             if (User?.Identity.IsAuthenticated == true)
             {
                 // delete local authentication cookie
+                // logged out of identity server
                 await HttpContext.SignOutAsync();
 
                 // raise the logout event
@@ -239,12 +247,15 @@ namespace IdentityServerHost.Quickstart.UI
         /*****************************************/
         private async Task<LoginViewModel> BuildLoginViewModelAsync(string returnUrl)
         {
+            // using returnUrl to get info on context of current auth request
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+            // shortcut if using Identity server gateway to external identity providers
             if (context?.IdP != null && await _schemeProvider.GetSchemeAsync(context.IdP) != null)
             {
                 var local = context.IdP == IdentityServer4.IdentityServerConstants.LocalIdentityProvider;
 
                 // this is meant to short circuit the UI and only trigger the one external IdP
+                // don't see local login
                 var vm = new LoginViewModel
                 {
                     EnableLocalLogin = local,
@@ -260,8 +271,11 @@ namespace IdentityServerHost.Quickstart.UI
                 return vm;
             }
 
+            // cookie auth and oidc schemas
             var schemes = await _schemeProvider.GetAllSchemesAsync();
 
+            // use this to show the various types of logins needed
+            // like local or login with google, facebook, etc
             var providers = schemes
                 .Where(x => x.DisplayName != null)
                 .Select(x => new ExternalProvider
@@ -273,6 +287,7 @@ namespace IdentityServerHost.Quickstart.UI
             var allowLocal = true;
             if (context?.Client.ClientId != null)
             {
+                // this filters the provider list based on the client Id being used
                 var client = await _clientStore.FindEnabledClientByIdAsync(context.Client.ClientId);
                 if (client != null)
                 {
@@ -285,6 +300,7 @@ namespace IdentityServerHost.Quickstart.UI
                 }
             }
 
+            // returned to view
             return new LoginViewModel
             {
                 AllowRememberLogin = AccountOptions.AllowRememberLogin,
@@ -314,6 +330,7 @@ namespace IdentityServerHost.Quickstart.UI
                 return vm;
             }
 
+            // gets context on logout
             var context = await _interaction.GetLogoutContextAsync(logoutId);
             if (context?.ShowSignoutPrompt == false)
             {
