@@ -42,7 +42,7 @@ namespace Marvin.IDP.UserRegistration
             // this is our custom user entity
             var userToCreate = new Entities.User
             {
-                Password = model.Password,
+                //Password = model.Password,
                 UserName = model.UserName,
                 Subject = Guid.NewGuid().ToString(),
                 Active = true // by default for now
@@ -73,7 +73,7 @@ namespace Marvin.IDP.UserRegistration
                 Value = model.FamilyName
             });
 
-            _localUserService.AddUser(userToCreate);
+            _localUserService.AddUser(userToCreate, model.Password);
             await _localUserService.SaveChangesAsync();
 
             // if new user and activated we should sign them in

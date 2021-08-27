@@ -119,7 +119,8 @@ namespace IdentityServerHost.Quickstart.UI
             {
                 // validate username/password against in-memory store
                 //if (_users.ValidateCredentials(model.Username, model.Password))
-                if (await _localUserService.ValidateClearTextCredentialsAsync(model.Username, model.Password))
+                //if (await _localUserService.ValidateClearTextCredentialsAsync(model.Username, model.Password))
+                if (await _localUserService.ValidateCredentialsAsync(model.Username, model.Password))
                 {
                     //var user = _users.FindByUsername(model.Username);
                     var user = await _localUserService.GetUserByUserNameAsync(model.Username);

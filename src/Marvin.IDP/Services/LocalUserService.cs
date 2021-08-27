@@ -15,13 +15,16 @@ namespace Marvin.IDP.Services
     public class LocalUserService : ILocalUserService
     {
         private readonly IdentityDbContext _context;
+        private readonly IPasswordHasher<User> _passwordHasher;
 
         public LocalUserService(
-            IdentityDbContext context)
+            IdentityDbContext context,
+            IPasswordHasher<User> passwordHasher)
         {
-            _context = context ?? 
+            _passwordHasher = passwordHasher;
+            _context = context ??
                 throw new ArgumentNullException(nameof(context));
-        }          
+        }
 
         public async Task<bool> IsUserActive(string subject)
         {
@@ -39,57 +42,57 @@ namespace Marvin.IDP.Services
 
             return user.Active;
         }
-         
-        public async Task<bool> ValidateClearTextCredentialsAsync(string userName,
-          string password)
+
+        // public async Task<bool> ValidateClearTextCredentialsAsync(string userName,
+        //   string password)
+        // {
+        //     if (string.IsNullOrWhiteSpace(userName) ||
+        //         string.IsNullOrWhiteSpace(password))
+        //     {
+        //         return false;
+        //     }
+
+        //     var user = await GetUserByUserNameAsync(userName);
+
+        //     if (user == null)
+        //     {
+        //         return false;
+        //     }
+
+        //     if (!user.Active)
+        //     {
+        //         return false;
+        //     }
+
+        //     // Validate credentials
+        //     return (user.Password == password);
+        // }
+
+        public async Task<bool> ValidateCredentialsAsync(string userName, 
+           string password)
         {
-            if (string.IsNullOrWhiteSpace(userName) ||
-                string.IsNullOrWhiteSpace(password))
-            {
-                return false;
-            }
+           if (string.IsNullOrWhiteSpace(userName) || 
+               string.IsNullOrWhiteSpace(password))
+           {
+               return false;
+           }
 
-            var user = await GetUserByUserNameAsync(userName);
+           var user = await GetUserByUserNameAsync(userName);
 
-            if (user == null)
-            {
-                return false;
-            }
+           if (user == null)
+           {
+               return false;
+           }
 
-            if (!user.Active)
-            {
-                return false;
-            }
+           if (!user.Active)
+           {
+               return false;
+           }
 
-            // Validate credentials
-            return (user.Password == password);
+           // Validate credentials
+           var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.Password, password);        
+           return (verificationResult == PasswordVerificationResult.Success);
         }
-
-        //public async Task<bool> ValidateCredentialsAsync(string userName, 
-        //    string password)
-        //{
-        //    if (string.IsNullOrWhiteSpace(userName) || 
-        //        string.IsNullOrWhiteSpace(password))
-        //    {
-        //        return false;
-        //    }
-
-        //    var user = await GetUserByUserNameAsync(userName);
-
-        //    if (user == null)
-        //    {
-        //        return false;
-        //    }
-
-        //    if (!user.Active)
-        //    {
-        //        return false;
-        //    }
-
-        //    // Validate credentials
-        //    var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.Password, password);        
-        //    return (verificationResult == PasswordVerificationResult.Success);
-        //}
 
         public async Task<User> GetUserByUserNameAsync(string userName)
         {
@@ -101,17 +104,17 @@ namespace Marvin.IDP.Services
             return await _context.Users
                  .FirstOrDefaultAsync(u => u.UserName == userName);
         }
- 
+
         public async Task<IEnumerable<UserClaim>> GetUserClaimsBySubjectAsync(string subject)
-        { 
+        {
             if (string.IsNullOrWhiteSpace(subject))
             {
                 throw new ArgumentNullException(nameof(subject));
             }
 
-            return await _context.UserClaims.Where(u => u.User.Subject == subject).ToListAsync(); 
+            return await _context.UserClaims.Where(u => u.User.Subject == subject).ToListAsync();
         }
-         
+
         public async Task<User> GetUserBySubjectAsync(string subject)
         {
             if (string.IsNullOrWhiteSpace(subject))
@@ -121,12 +124,17 @@ namespace Marvin.IDP.Services
 
             return await _context.Users.FirstOrDefaultAsync(u => u.Subject == subject);
         }
-     
-        public void AddUser(User userToAdd)
+
+        public void AddUser(User userToAdd, string password)
         {
             if (userToAdd == null)
-            { 
+            {
                 throw new ArgumentNullException(nameof(userToAdd));
+            }
+
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                throw new ArgumentNullException(nameof(password));
             }
 
             if (_context.Users.Any(u => u.UserName == userToAdd.UserName))
@@ -135,7 +143,8 @@ namespace Marvin.IDP.Services
                 // return this as a validation issue
                 throw new Exception("Username must be unique");
             }
-            
+
+            userToAdd.Password = _passwordHasher.HashPassword(userToAdd, password);
             _context.Users.Add(userToAdd);
         }
 
@@ -184,7 +193,7 @@ namespace Marvin.IDP.Services
         //    {
         //        throw new ArgumentNullException(nameof(securityCode));
         //    }
-            
+
         //    // find an user with this security code as an active security code.  
         //    var user = await _context.Users.FirstOrDefaultAsync(u => 
         //        u.SecurityCode == securityCode && 
@@ -218,7 +227,7 @@ namespace Marvin.IDP.Services
         //    }
 
         //    var user = await GetUserBySubjectAsync(subject); 
-            
+
         //    if (user == null)
         //    {
         //        return false;
@@ -326,7 +335,7 @@ namespace Marvin.IDP.Services
 
         //    return userLogin?.User;
         //}
-        
+
         //public async Task AddExternalProviderToUser(
         //    string subject,
         //    string provider,
@@ -354,7 +363,7 @@ namespace Marvin.IDP.Services
         //        ProviderIdentityKey = providerIdentityKey
         //    });            
         //}
-        
+
         //public User ProvisionUserFromExternalIdentity(
         //    string provider, 
         //    string providerIdentityKey,
@@ -394,11 +403,11 @@ namespace Marvin.IDP.Services
         //    return user;
         //}
 
-      
+
 
         public async Task<bool> SaveChangesAsync()
         {
             return (await _context.SaveChangesAsync() > 0);
-        }      
+        }
     }
 }
