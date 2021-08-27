@@ -281,31 +281,32 @@ namespace Marvin.IDP.Services
         //        .FirstOrDefaultAsync(u => u.User.Subject == subject && u.Name == name);
         //}
 
-        //public async Task<string> InitiatePasswordResetRequest(string email)
-        //{
-        //    if (string.IsNullOrWhiteSpace(email))
-        //    {
-        //        throw new ArgumentNullException(nameof(email));
-        //    }
+        public async Task<string> InitiatePasswordResetRequest(string email)
+        {
+           if (string.IsNullOrWhiteSpace(email))
+           {
+               throw new ArgumentNullException(nameof(email));
+           }
 
-        //    var user = await _context.Users.FirstOrDefaultAsync(u =>
-        //      u.Email == email);
+            // this is why we check for unique email to create user
+           var user = await _context.Users.FirstOrDefaultAsync(u =>
+             u.Email == email);
 
-        //    if (user == null)
-        //    {
-        //        throw new Exception($"User with email address {email} can't be found.");
-        //    }
+           if (user == null)
+           {
+               throw new Exception($"User with email address {email} can't be found.");
+           }
 
-        //    using (var randomNumberGenerator = new RNGCryptoServiceProvider())
-        //    {
-        //        var securityCodeData = new byte[128];
-        //        randomNumberGenerator.GetBytes(securityCodeData);
-        //        user.SecurityCode = Convert.ToBase64String(securityCodeData);
-        //    }
+           using (var randomNumberGenerator = new RNGCryptoServiceProvider())
+           {
+               var securityCodeData = new byte[128];
+               randomNumberGenerator.GetBytes(securityCodeData);
+               user.SecurityCode = Convert.ToBase64String(securityCodeData);
+           }
 
-        //    user.SecurityCodeExpirationDate = DateTime.UtcNow.AddHours(1);
-        //    return user.SecurityCode;
-        //}
+           user.SecurityCodeExpirationDate = DateTime.UtcNow.AddHours(1);
+           return user.SecurityCode;
+        }
 
         //public async Task<bool> SetPassword(string securityCode, string password)
         //{

@@ -31,8 +31,8 @@ namespace Marvin.IDP.Services
         Task<bool> ActivateUser(
            string securityCode);
         Task<bool> SaveChangesAsync();
-        //Task<string> InitiatePasswordResetRequest(
-        //    string email);
+        Task<string> InitiatePasswordResetRequest(
+           string email);
         //Task<bool> SetPassword(
         //    string securityCode, 
         //    string password);
