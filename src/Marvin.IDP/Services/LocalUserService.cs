@@ -308,32 +308,32 @@ namespace Marvin.IDP.Services
            return user.SecurityCode;
         }
 
-        //public async Task<bool> SetPassword(string securityCode, string password)
-        //{
-        //    if (string.IsNullOrWhiteSpace(securityCode))
-        //    {
-        //        throw new ArgumentNullException(nameof(securityCode));
-        //    }
+        public async Task<bool> SetPassword(string securityCode, string password)
+        {
+           if (string.IsNullOrWhiteSpace(securityCode))
+           {
+               throw new ArgumentNullException(nameof(securityCode));
+           }
 
-        //    if (string.IsNullOrWhiteSpace(password))
-        //    {
-        //        throw new ArgumentNullException(nameof(password));
-        //    }
+           if (string.IsNullOrWhiteSpace(password))
+           {
+               throw new ArgumentNullException(nameof(password));
+           }
 
-        //    var user = await _context.Users.FirstOrDefaultAsync(u =>
-        //    u.SecurityCode == securityCode &&
-        //    u.SecurityCodeExpirationDate >= DateTime.UtcNow);
+           var user = await _context.Users.FirstOrDefaultAsync(u =>
+           u.SecurityCode == securityCode &&
+           u.SecurityCodeExpirationDate >= DateTime.UtcNow);
 
-        //    if (user == null)
-        //    {
-        //        return false;
-        //    }
+           if (user == null)
+           {
+               return false;
+           }
 
-        //    user.SecurityCode = null;
-        //    // hash & salt the password
-        //    user.Password = _passwordHasher.HashPassword(user, password);
-        //    return true;        
-        //}
+           user.SecurityCode = null;
+           // hash & salt the password
+           user.Password = _passwordHasher.HashPassword(user, password);
+           return true;        
+        }
 
         //public async Task<User> GetUserByExternalProvider(
         //    string provider, 

@@ -43,5 +43,41 @@ namespace Marvin.IDP.PasswordReset
 
             return View("PasswordResetRequestSent");
         }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string securityCode)
+        {
+            var vm = new ResetPasswordViewModel()
+            {
+                // we are passing in the security code from URL
+                SecurityCode = securityCode
+            };
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+             if (await _localUserService.SetPassword(model.SecurityCode, model.Password))
+            {
+                ViewData["Message"] = "Your password was successfully changed.  " +
+                    "Navigate to your client application to log in.";
+            }
+            else
+            {
+                ViewData["Message"] = "Your password couldn't be changed, please" +
+                    " contact your administrator.";
+            }
+
+            await _localUserService.SaveChangesAsync();
+
+            return View("ResetPasswordResult");
+        }
     }
 }
