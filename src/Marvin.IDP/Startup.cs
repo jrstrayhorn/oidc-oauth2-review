@@ -5,6 +5,7 @@
 using IdentityServerHost.Quickstart.UI;
 using Marvin.IDP.DbContexts;
 using Marvin.IDP.Services;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -47,10 +48,38 @@ namespace Marvin.IDP
                 .AddInMemoryClients(Config.Clients);
                 //.AddTestUsers(TestUsers.Users);
 
-            builder.AddProfileService<LocalUserProfileService>();
+            //builder.AddProfileService<LocalUserProfileService>();
             
             // not recommended for production - you need to store your key material somewhere secure
             builder.AddDeveloperSigningCredential();
+
+            services.AddAuthentication().AddFacebook(
+                "Facebook",
+                options =>
+                {
+                    options.AppId = "243290691337887";
+                    options.AppSecret = "6a6467d7888457e5a92947c2f95844ef";
+                    options.SignInScheme = 
+                        IdentityServer4.IdentityServerConstants.ExternalCookieAuthenticationScheme;
+                }
+            )
+            .AddOpenIdConnect("okta", "Okta", options =>
+            {
+                options.SignInScheme = 
+                    IdentityServer4.IdentityServerConstants.ExternalCookieAuthenticationScheme;
+                options.Authority = "https://dev-1232334343.okta.com";
+                options.ClientId = "dafdafdfsdfadsdffatf5d7";
+                options.ClientSecret = "dafddafdadsfadfs9U83rYdfasdfasdSRG27";
+                //options.CallbackPath = "/signin-oidc";
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
+            });
+
+            services.Configure<OpenIdConnectOptions>("okta", options =>
+            {
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
+            });
         }
 
         public void Configure(IApplicationBuilder app)

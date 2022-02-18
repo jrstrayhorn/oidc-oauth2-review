@@ -74,6 +74,11 @@ namespace Marvin.IDP
                     AccessTokenLifetime = 120,
                     // allows client to request access token
                     AllowOfflineAccess = true,
+                    EnableLocalLogin = false,
+                    IdentityProviderRestrictions = new List<string>()
+                    {
+                        "okta"
+                    },
                     // when refresh token is issued, ensure fresh claims data
                     UpdateAccessTokenClaimsOnRefresh = true,
                     ClientName = "Image Gallery",

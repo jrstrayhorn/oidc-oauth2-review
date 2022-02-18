@@ -70,6 +70,7 @@ namespace IdentityServerHost.Quickstart.UI
                 }
             };
 
+            // the scheme triggers the middle ware necessary to "answer" this challenge
             return Challenge(props, scheme);
             
         }
