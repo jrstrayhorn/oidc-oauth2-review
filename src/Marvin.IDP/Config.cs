@@ -51,7 +51,7 @@ namespace Marvin.IDP
                 // you can include identity related scopes with api resources when defining
                 // if you need to add identity related scopes to access token
                 new ApiResource("imagegalleryapi", "Image Gallery API" 
-                    /*part of application user profile nownew List<string>() { "role", "subscriptionlevel" }*/
+                    /*part of application user profile now new List<string>() { "role", "subscriptionlevel" }*/
                     )
                 {
                     Scopes = {"imagegalleryapi"},
@@ -74,11 +74,11 @@ namespace Marvin.IDP
                     AccessTokenLifetime = 120,
                     // allows client to request access token
                     AllowOfflineAccess = true,
-                    EnableLocalLogin = false,
-                    IdentityProviderRestrictions = new List<string>()
-                    {
-                        "okta"
-                    },
+                    // EnableLocalLogin = false,
+                    // IdentityProviderRestrictions = new List<string>()
+                    // {
+                    //     "okta"
+                    // },
                     // when refresh token is issued, ensure fresh claims data
                     UpdateAccessTokenClaimsOnRefresh = true,
                     ClientName = "Image Gallery",

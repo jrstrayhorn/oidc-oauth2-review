@@ -48,7 +48,8 @@ namespace Marvin.IDP
                 .AddInMemoryClients(Config.Clients);
                 //.AddTestUsers(TestUsers.Users);
 
-            //builder.AddProfileService<LocalUserProfileService>();
+            // this will pull claims that are need for scope from user claims
+            builder.AddProfileService<LocalUserProfileService>();
             
             // not recommended for production - you need to store your key material somewhere secure
             builder.AddDeveloperSigningCredential();
@@ -57,8 +58,8 @@ namespace Marvin.IDP
                 "Facebook",
                 options =>
                 {
-                    options.AppId = "243290691337887";
-                    options.AppSecret = "6a6467d7888457e5a92947c2f95844ef";
+                    options.AppId = "use-app-fb-app-id-here";
+                    options.AppSecret = "use-fb-app-secret-here";
                     options.SignInScheme = 
                         IdentityServer4.IdentityServerConstants.ExternalCookieAuthenticationScheme;
                 }
@@ -67,16 +68,9 @@ namespace Marvin.IDP
             {
                 options.SignInScheme = 
                     IdentityServer4.IdentityServerConstants.ExternalCookieAuthenticationScheme;
-                options.Authority = "https://dev-1232334343.okta.com";
-                options.ClientId = "dafdafdfsdfadsdffatf5d7";
-                options.ClientSecret = "dafddafdadsfadfs9U83rYdfasdfasdSRG27";
-                //options.CallbackPath = "/signin-oidc";
-                options.Scope.Add("openid");
-                options.Scope.Add("profile");
-            });
-
-            services.Configure<OpenIdConnectOptions>("okta", options =>
-            {
+                options.Authority = "https://use-dev-here.okta.com";
+                options.ClientId = "use-okta-client-id-here";
+                options.ClientSecret = "use-okta-client-secret-here";
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
             });

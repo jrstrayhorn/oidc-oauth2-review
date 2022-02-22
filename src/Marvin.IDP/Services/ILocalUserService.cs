@@ -20,7 +20,10 @@ namespace Marvin.IDP.Services
         Task<User> GetUserByUserNameAsync(
             string userName);
         Task<User> GetUserBySubjectAsync(
-            string subject);        
+            string subject);   
+        Task<User> GetUserByEmailAsync(
+            string subject
+        );     
         // void AddUser
         //     (User userToAdd);    
         void AddUser(
@@ -36,17 +39,17 @@ namespace Marvin.IDP.Services
         Task<bool> SetPassword(
            string securityCode, 
            string password);
-        //Task<User> GetUserByExternalProvider(
-        //    string provider,
-        //    string providerIdentityKey);
-        //User ProvisionUserFromExternalIdentity(
-        //    string provider,
-        //    string providerIdentityKey, 
-        //    IEnumerable<Claim> claims);
-        //Task AddExternalProviderToUser(
-        //    string subject, 
-        //    string provider,
-        //    string providerIdentityKey);
+        Task<User> GetUserByExternalProvider(
+           string provider,
+           string providerIdentityKey);
+        User ProvisionUserFromExternalIdentity(
+           string provider,
+           string providerIdentityKey, 
+           IEnumerable<Claim> claims);
+        Task AddExternalProviderToUser(
+           string subject, 
+           string provider,
+           string providerIdentityKey);
         //Task<bool> AddUserSecret(
         //    string subject, 
         //    string name, 

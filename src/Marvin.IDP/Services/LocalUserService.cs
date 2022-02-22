@@ -125,6 +125,16 @@ namespace Marvin.IDP.Services
             return await _context.Users.FirstOrDefaultAsync(u => u.Subject == subject);
         }
 
+        public async Task<User> GetUserByEmailAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                throw new ArgumentNullException(nameof(email));
+            }
+
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
         public void AddUser(User userToAdd, string password)
         {
             if (userToAdd == null)
@@ -335,92 +345,100 @@ namespace Marvin.IDP.Services
            return true;        
         }
 
-        //public async Task<User> GetUserByExternalProvider(
-        //    string provider, 
-        //    string providerIdentityKey)
-        //{
-        //    if (string.IsNullOrWhiteSpace(provider))
-        //    {
-        //        throw new ArgumentNullException(nameof(provider));
-        //    }
+        public async Task<User> GetUserByExternalProvider(
+           string provider, 
+           string providerIdentityKey)
+        {
+           if (string.IsNullOrWhiteSpace(provider))
+           {
+               throw new ArgumentNullException(nameof(provider));
+           }
 
-        //    if (string.IsNullOrWhiteSpace(providerIdentityKey))
-        //    {
-        //        throw new ArgumentNullException(nameof(providerIdentityKey));
-        //    }
+           if (string.IsNullOrWhiteSpace(providerIdentityKey))
+           {
+               throw new ArgumentNullException(nameof(providerIdentityKey));
+           }
 
-        //    var userLogin = await _context.UserLogins.Include(ul => ul.User)
-        //        .FirstOrDefaultAsync(ul => ul.Provider == provider && ul.ProviderIdentityKey == providerIdentityKey);
+           var userLogin = await _context.UserLogins.Include(ul => ul.User)
+               .FirstOrDefaultAsync(ul => ul.Provider == provider && ul.ProviderIdentityKey == providerIdentityKey);
 
-        //    return userLogin?.User;
-        //}
+           return userLogin?.User;
+        }
 
-        //public async Task AddExternalProviderToUser(
-        //    string subject,
-        //    string provider,
-        //    string providerIdentityKey)
-        //{
-        //    if (string.IsNullOrWhiteSpace(subject))
-        //    {
-        //        throw new ArgumentNullException(nameof(subject));
-        //    }
+        public async Task AddExternalProviderToUser(
+           string subject,
+           string provider,
+           string providerIdentityKey)
+        {
+           if (string.IsNullOrWhiteSpace(subject))
+           {
+               throw new ArgumentNullException(nameof(subject));
+           }
 
-        //    if (string.IsNullOrWhiteSpace(provider))
-        //    {
-        //        throw new ArgumentNullException(nameof(provider));
-        //    }
+           if (string.IsNullOrWhiteSpace(provider))
+           {
+               throw new ArgumentNullException(nameof(provider));
+           }
 
-        //    if (string.IsNullOrWhiteSpace(providerIdentityKey))
-        //    {
-        //        throw new ArgumentNullException(nameof(providerIdentityKey));
-        //    }
+           if (string.IsNullOrWhiteSpace(providerIdentityKey))
+           {
+               throw new ArgumentNullException(nameof(providerIdentityKey));
+           }
 
-        //    var user = await GetUserBySubjectAsync(subject);
-        //    user.Logins.Add(new UserLogin()
-        //    {
-        //        Provider = provider,
-        //        ProviderIdentityKey = providerIdentityKey
-        //    });            
-        //}
+           var user = await GetUserBySubjectAsync(subject);
+           user.Logins.Add(new UserLogin()
+           {
+               Provider = provider,
+               ProviderIdentityKey = providerIdentityKey
+           });            
+        }
 
-        //public User ProvisionUserFromExternalIdentity(
-        //    string provider, 
-        //    string providerIdentityKey,
-        //    IEnumerable<Claim> claims)
-        //{
-        //    if (string.IsNullOrWhiteSpace(provider))
-        //    {
-        //        throw new ArgumentNullException(nameof(provider));
-        //    }
+        public User ProvisionUserFromExternalIdentity(
+           string provider, 
+           string providerIdentityKey,
+           IEnumerable<Claim> claims)
+        {
+           if (string.IsNullOrWhiteSpace(provider))
+           {
+               throw new ArgumentNullException(nameof(provider));
+           }
 
-        //    if (string.IsNullOrWhiteSpace(providerIdentityKey))
-        //    {
-        //        throw new ArgumentNullException(nameof(providerIdentityKey));
-        //    }
+           if (string.IsNullOrWhiteSpace(providerIdentityKey))
+           {
+               throw new ArgumentNullException(nameof(providerIdentityKey));
+           }
 
-        //    var user = new User()
-        //    {
-        //        Active = true,
-        //        Subject = Guid.NewGuid().ToString()
-        //    };
-        //    foreach (var claim in claims)
-        //    {
-        //        user.Claims.Add(new UserClaim()
-        //        {
-        //            Type = claim.Type,
-        //            Value = claim.Value
-        //        });
-        //    }
-        //    user.Logins.Add(new UserLogin()
-        //    {
-        //         Provider = provider,
-        //         ProviderIdentityKey = providerIdentityKey
-        //    });
+           // user doesn't not have a user name and password
+           // it's important to make this not required in schema/database
+           // external users when add to local user store will not have a username
+           // and password b/c that is handled by the external provider for that user
+           var user = new User()
+           {
+               Active = true,
+               Subject = Guid.NewGuid().ToString()  // primary key of local user
+           };
+           // don't add email here or to user above b/c user shouldn't be able to update
+           // their email address here that is responsibility of external provider
+           foreach (var claim in claims)
+           {
+               // this might have email claim so it's a user claim
+               // might be used by external provider
+               user.Claims.Add(new UserClaim()
+               {
+                   Type = claim.Type,
+                   Value = claim.Value
+               });
+           }
+           user.Logins.Add(new UserLogin()
+           {
+                Provider = provider,
+                ProviderIdentityKey = providerIdentityKey
+           });
 
-        //    _context.Users.Add(user);
+           _context.Users.Add(user);
 
-        //    return user;
-        //}
+           return user;
+        }
 
 
 

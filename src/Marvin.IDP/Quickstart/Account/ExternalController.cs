@@ -4,6 +4,8 @@ using IdentityServer4.Events;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using IdentityServer4.Test;
+using Marvin.IDP.Entities;
+using Marvin.IDP.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -21,23 +23,55 @@ namespace IdentityServerHost.Quickstart.UI
     [AllowAnonymous]
     public class ExternalController : Controller
     {
-        private readonly TestUserStore _users;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IClientStore _clientStore;
         private readonly ILogger<ExternalController> _logger;
         private readonly IEventService _events;
+        private readonly ILocalUserService _localUserService;
+        private readonly Dictionary<string, string> _facebookClaimTypeMap =
+            new Dictionary<string, string>()
+            {
+                {
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
+                    JwtClaimTypes.GivenName  
+                },
+                {
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
+                    JwtClaimTypes.FamilyName
+                },
+                {
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+                    JwtClaimTypes.Email
+                }
+            };
+
+        private readonly Dictionary<string, string> _oktaClaimTypeMap =
+            new Dictionary<string, string>()
+            {
+                {
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
+                    JwtClaimTypes.GivenName  
+                },
+                {
+                    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
+                    JwtClaimTypes.FamilyName
+                },
+                {
+                    "preferred_username",
+                    JwtClaimTypes.Email
+                }
+            };
 
         public ExternalController(
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IEventService events,
             ILogger<ExternalController> logger,
-            TestUserStore users = null)
+            ILocalUserService localUserService
+            )
         {
-            // if the TestUserStore is not in DI, then we'll just use the global users collection
-            // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
-            _users = users ?? new TestUserStore(TestUsers.Users);
-
+            _localUserService = localUserService ??
+                throw new ArgumentNullException(nameof(localUserService));
             _interaction = interaction;
             _clientStore = clientStore;
             _logger = logger;
@@ -95,13 +129,18 @@ namespace IdentityServerHost.Quickstart.UI
             }
 
             // lookup our user and external provider info
-            var (user, provider, providerUserId, claims) = FindUserFromExternalProvider(result);
+            var (user, provider, providerUserId, claims) = await FindUserFromExternalProvider(result);
             if (user == null)
             {
+                if (provider == "okta") {
+                    user = await AutoProvisionOktaUser(provider, providerUserId, claims);
+                }
+                else {
                 // this might be where you might initiate a custom workflow for user registration
                 // in this sample we don't show how that would be done, as our sample implementation
                 // simply auto-provisions new external user
-                user = AutoProvisionUser(provider, providerUserId, claims);
+                user = await AutoProvisionUser(provider, providerUserId, claims);
+                }
             }
 
             // this allows us to collect any additional claims or properties
@@ -112,9 +151,9 @@ namespace IdentityServerHost.Quickstart.UI
             ProcessLoginCallback(result, additionalLocalClaims, localSignInProps);
             
             // issue authentication cookie for user
-            var isuser = new IdentityServerUser(user.SubjectId)
+            var isuser = new IdentityServerUser(user.Subject)
             {
-                DisplayName = user.Username,
+                DisplayName = user.UserName,
                 IdentityProvider = provider,
                 AdditionalClaims = additionalLocalClaims
             };
@@ -129,7 +168,7 @@ namespace IdentityServerHost.Quickstart.UI
 
             // check if external login is in the context of an OIDC request
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
-            await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, user.SubjectId, user.Username, true, context?.Client.ClientId));
+            await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, user.Subject, user.UserName, true, context?.Client.ClientId));
 
             if (context != null)
             {
@@ -144,8 +183,10 @@ namespace IdentityServerHost.Quickstart.UI
             return Redirect(returnUrl);
         }
 
-        private (TestUser user, string provider, string providerUserId, IEnumerable<Claim> claims) FindUserFromExternalProvider(AuthenticateResult result)
+        private async Task<(User user, string provider, 
+            string providerUserId, IEnumerable<Claim> claims)> FindUserFromExternalProvider(AuthenticateResult result)
         {
+            // user from external provider
             var externalUser = result.Principal;
 
             // try to determine the unique id of the external user (issued by the provider)
@@ -163,14 +204,58 @@ namespace IdentityServerHost.Quickstart.UI
             var providerUserId = userIdClaim.Value;
 
             // find external user
-            var user = _users.FindByExternalProvider(provider, providerUserId);
+            var user = await _localUserService.GetUserByExternalProvider(provider, providerUserId);
 
             return (user, provider, providerUserId, claims);
         }
 
-        private TestUser AutoProvisionUser(string provider, string providerUserId, IEnumerable<Claim> claims)
+        private async Task<User> AutoProvisionUser(string provider, string providerUserId, IEnumerable<Claim> claims)
         {
-            var user = _users.AutoProvisionUser(provider, providerUserId, claims.ToList());
+            // can do more here!
+            // could update claim from 3rd party that is stored in database at certain intervals
+            // automatically add or remove claims from 3rd party that are now needed or no longer used
+            // depends on the use case
+            var mappedClaims = new List<Claim>();
+            // map the claims, and ignore those for which no mapping exists
+            foreach (var claim in claims)
+            {
+                if (_facebookClaimTypeMap.ContainsKey(claim.Type))
+                {
+                    mappedClaims.Add(new Claim(_facebookClaimTypeMap[claim.Type], claim.Value));
+                }
+            }
+            var user = _localUserService.ProvisionUserFromExternalIdentity(provider, providerUserId, mappedClaims);
+            await _localUserService.SaveChangesAsync();
+            return user;
+        }
+
+        private async Task<User> AutoProvisionOktaUser(string provider, string providerUserId, IEnumerable<Claim> claims)
+        {
+            // what is email claim
+            string email = claims.FirstOrDefault(c => c.Type == "preferred_username").Value;
+
+            // try to find user by email address
+            var existingUser = await _localUserService.GetUserByEmailAsync(email);
+
+            if (existingUser != null)
+            {
+                await _localUserService.AddExternalProviderToUser(
+                    existingUser.Subject,
+                    provider,
+                    providerUserId
+                );
+                await _localUserService.SaveChangesAsync();
+
+                return existingUser;
+            }
+
+            // if existingUser is null, meaning a new user, we'd need to mapped the okta claims and use those when
+            // provisioning the user instead of a new List<Claim>();
+
+
+            var user = _localUserService.ProvisionUserFromExternalIdentity(provider, providerUserId,
+                new List<Claim>());
+            await _localUserService.SaveChangesAsync();
             return user;
         }
 
