@@ -41,7 +41,8 @@ namespace Marvin.IDP
         public static IEnumerable<ApiScope> ApiScopes =>
             new ApiScope[]
             { 
-                new ApiScope("imagegalleryapi", "Image Gallery API")
+                new ApiScope("imagegalleryapi", "Image Gallery API"),
+                new ApiScope("api1", "My API")
             };
 
         // logically grouping of Api Scopes, used to define an entire api
@@ -108,6 +109,28 @@ namespace Marvin.IDP
                     },
                     // to turn off pkce, by default pkce is turned on in the latest version of IdentityServer
                     //RequirePkce = false
+                },
+                new Client
+                {
+                    ClientId = "client",
+
+                    // no interactive user, use the clientid/secret for authentication
+                    AllowedGrantTypes = GrantTypes.ClientCredentials,
+
+                    // secret for authentication
+                    ClientSecrets =
+                    {
+                        new Secret("secret".Sha256())
+                    },
+
+                    // scopes that client has access to
+                    AllowedScopes = { "api1" },
+
+                    // allows swagger to call token endpoint to get access token
+                    AllowedCorsOrigins = new List<string>()
+                    {
+                        "https://localhost:6001"
+                    }
                 }
             };
     }
